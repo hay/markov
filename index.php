@@ -34,6 +34,10 @@ if (isset($_POST['submit'])) {
     <?php echo file_get_contents('http://static.haykranen.nl/common/nav/html/head.php'); ?>        
 </head>
 <body>
+<a href="http://github.com/hay/markov">
+    <img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" />
+</a>
+
 <?php echo file_get_contents('http://static.haykranen.nl/common/nav/html/nav.php'); ?>
 <div id="wrapper">
     <h1>PHP Markov chain text generator</h1>

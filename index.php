@@ -7,6 +7,8 @@
 
 require 'markov.php';
 
+$texts = array("alice", "calvin", "kant");
+
 if (isset($_POST['submit'])) {
     // generate text with markov library
     $order  = $_REQUEST['order'];
@@ -15,7 +17,9 @@ if (isset($_POST['submit'])) {
     $ptext  = $_REQUEST['text'];
 
     if ($input) $text = $input;
-    if ($ptext) $text = file_get_contents("text/".$ptext.".txt");
+    if ($ptext && in_array($ptext, $texts)) {
+        $text = file_get_contents("text/".$ptext.".txt");
+    }
 
     if(isset($text)) {
         $markov_table = generate_markov_table($text, $order);

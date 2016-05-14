@@ -7,25 +7,52 @@
 
 require 'markov.php';
 
-$texts = array("alice", "calvin", "kant");
-
-if (isset($_POST['submit'])) {
+function process_post() {
     // generate text with markov library
-    $order  = $_REQUEST['order'];
-    $length = $_REQUEST['length'];
-    $input  = $_REQUEST['input'];
-    $ptext  = $_REQUEST['text'];
+    $order  = $_POST['order'];
+    $length = $_POST['length'];
+    $input  = $_POST['input'];
+    $ptext  = $_POST['text'];
 
-    if ($input) $text = $input;
-    if ($ptext && in_array($ptext, $texts)) {
-        $text = file_get_contents("text/".$ptext.".txt");
+    if (!ctype_digit($order) || !ctype_digit($length)) {
+        throw new Exception("Your order or length are not correct");
     }
 
-    if(isset($text)) {
-        $markov_table = generate_markov_table($text, $order);
-        $markov = generate_markov_text($length, $markov_table, $order);
+    $order = (int) $order;
+    $length = (int) $length;
 
-        if (get_magic_quotes_gpc()) $markov = stripslashes($markov);
+    if ($order < 0 || $order > 20) {
+        throw new Exception("Invalid order");
+    }
+
+    if ($length < 1 || $length > 25000) {
+        throw new Exception("Text length is too short or too long");
+    }
+
+    if ($input) {
+        $text = $input;
+    } else if ($ptext) {
+        if (!in_array($ptext, ['alice', 'calvin', 'kant'])) {
+            throw new Exception("Invalid text");
+        } else {
+            $text = file_get_contents("./text/$ptext.txt");
+        }
+    }
+
+    if (empty($text)) {
+        throw new Exception("No text given");
+    }
+
+    $markov_table = generate_markov_table($text, $order);
+    $markov = generate_markov_text($length, $markov_table, $order);
+    return htmlentities($markov);
+}
+
+if (isset($_POST['submit'])) {
+    try {
+        $markov = process_post();
+    } catch (Exception $e) {
+        $error = $e->getMessage();
     }
 }
 ?>
@@ -43,9 +70,13 @@ if (isset($_POST['submit'])) {
     text or by selecting one of the pre-selected texts available. </p>
     <p>The source code of this generator is available under the terms of the <a href="http://www.opensource.org/licenses/mit-license.php">MIT license</a>.See the original posting on this generator <a href="http://www.haykranen.nl/projects/markov">here</a>.</p>
 
-    <?php if (isset($markov)) : ?>
+    <?php if ($error): ?>
+        <p class="error"><strong><?= $error; ?></strong></p>
+    <?php endif; ?>
+
+    <?php if ($markov): ?>
         <h2>Output text</h2>
-        <textarea rows="20" cols="80" readonly="readonly"><?php echo $markov; ?></textarea>
+        <textarea rows="20" cols="60" readonly="readonly"><?= $markov; ?></textarea>
     <?php endif; ?>
 
     <h2>Input text</h2>

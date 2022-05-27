@@ -7,6 +7,9 @@
 
 require 'markov.php';
 
+$error = null;
+$markov = null;
+
 function process_post() {
     // generate text with markov library
     $order  = $_POST['order'];
